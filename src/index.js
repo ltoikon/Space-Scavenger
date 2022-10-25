@@ -1,4 +1,5 @@
-let game
+
+let game;
 const gameOptions = {
   shipGravity:0,//not used
   shipSpeed: 300
@@ -29,6 +30,63 @@ window.onload = function() {
   window.focus();
 };
 
+//TODO clean up
+//nää on seurausta sekoilusta kun en saanu ampumista toimii typon takia
+var shipBullets;
+//var ship;
+var speed;
+var stats;
+var cursors;
+var reticle;
+var lastFired = 0;
+
+
+//Bullet
+//https://github.com/photonstorm/phaser3-examples/blob/master/public/src/games/top%20down%20shooter/topdown_combatMechanics.js
+var Bullet = new Phaser.Class({
+	Extends: Phaser.GameObjects.Image,
+
+	initialize:
+
+	//constructor
+	function Bullet (scene){
+		Phaser.GameObjects.Image.call(this, scene, 0, 0, 'bullet');
+		this.speed = 1;
+		this.born = 0;
+		this.direction = 0;
+		this.xSpeed = 0;
+		this.ySpeed = 0;
+		this.setSize(12, 12, true);
+	},
+
+	//will fire a shot from the ship to the target(aim)
+	fire: function (shooter, target){
+		this.setPosition(shooter.x, shooter.y); //start position
+		this.direction = Math.atan((target.x - shooter.x)/(target.y - shooter.y));
+
+		//x, y velocity
+		if (target.y >= this.y){
+			this.xSpeed = this.speed*Math.sin(this.direction);
+			this.ySpeed = this.speed*Math.cos(this.direction);
+		} else {
+			this.xSpeed = -this.speed*Math.sin(this.direction);
+			this.ySpeed = -this.speed*Math.cos(this.direction);
+		}
+		this.born = 0 //launch delay, after all it is a ship
+	},
+
+	update: function (time, delta){
+		this.x += this.xSpeed * delta;
+		this.y += this.ySpeed * delta;
+		this.born += delta;
+		if (this.born > 1800){
+			this.setActive(false);
+			this.setVisible(false);
+		}
+	}
+});
+
+
 class Junk extends Phaser.Scene {
 
 	constructor() {
@@ -42,9 +100,11 @@ class Junk extends Phaser.Scene {
 		this.load.spritesheet('coin', 'assets/coin.png', {frameWidth:32, frameHeight: 32}); //sprite
 		this.load.image('sky', 'assets/clouds.png');
 		this.load.image('bar', 'assets/pipe3.png');
+		this.load.image('bullet', 'assets/bullet7.png');
 	}
 	
 	create () {
+
 		/*everything we use on gameplay: add here collisions, animation, controls  */
 		this.obstacleGroup = this.physics.add.group({
 			immovable: true,
@@ -61,10 +121,11 @@ class Junk extends Phaser.Scene {
 		}
 		//this.coin = this.physics.add.sprite(Phaser.Math.Between(0, game.config.width), 
 		//0, 'coin')
-
+		shipBullets = this.physics.add.group({classType: Bullet, runChildUpdate: true});
+		// alienBullets = this.physics.add.group({classtype: Bullet, runChildUpdate: true});
 		this.ship = this.physics.add.sprite(game.config.width/2, game.config.height/1.2, 'ship')
 		this.ship.body.gravity.y = gameOptions.shipGravity
-
+		reticle = this.physics.add.sprite(800, 700, 'bullet');
 		this.physics.add.collider(this.ship, this.obstacleGroup)
 
 		this.coinGroup = this.physics.add.group({
@@ -76,6 +137,37 @@ class Junk extends Phaser.Scene {
 		//Input
 
 		this.cursors = this.input.keyboard.createCursorKeys()
+		this.input.on('pointerdown', function (pointer, time, lastFired) {
+			if (this.ship.active === false)
+            return;
+
+			var bullet = shipBullets.get().setActive(true).setVisible(true);
+			if (bullet){
+				
+				bullet.fire(this.ship, reticle);
+				
+				
+			}		
+		}, this);
+
+		// Pointer lock will only work after mousedown
+		game.canvas.addEventListener('mousedown', function () {
+			game.input.mouse.requestPointerLock();
+		});
+
+		// Exit pointer lock when Q or escape (by default) is pressed.
+		this.input.keyboard.on('keydown_Q', function (event) {
+			if (game.input.mouse.locked)
+				game.input.mouse.releasePointerLock();
+		}, 0, this);
+
+		this.input.on('pointermove', function (pointer) {
+			if (this.input.mouse.locked)
+			{
+				reticle.x += pointer.movementX;
+				reticle.y += pointer.movementY;
+			}
+		}, this);
 
 		//Score
 		this.score = 0
@@ -142,6 +234,7 @@ class Junk extends Phaser.Scene {
 
 		if(this.cursors.up.isDown) {
 			this.ship.body.velocity.y = -gameOptions.shipSpeed
+		
 		}
 		else if(this.cursors.down.isDown) {
 			this.ship.body.velocity.y = gameOptions.shipSpeed
