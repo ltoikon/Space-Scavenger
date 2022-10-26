@@ -24,7 +24,7 @@ window.onload = function() {
             }
         }
     },
-    scene: Junk
+    scene: [Intro, Junk]
   };
   game = new Phaser.Game(config);
   window.focus();
@@ -86,6 +86,29 @@ var Bullet = new Phaser.Class({
 	}
 });
 
+class Intro extends Phaser.Scene{
+	constructor () {
+		super("Intro");
+	}
+
+	preload () {
+		this.load.spritesheet('ship', 'assets/ship.png', {frameWidth:93, frameHeight: 110});
+		this.load.image('sky', 'assets/clouds.png');
+	}
+
+	create () {
+		this.add.image(408, 608,'sky').setScale(1.5)
+		this.ship = this.physics.add.sprite(game.config.width/2, game.config.height/1.1, 'ship').setScale(1.5)
+		this.ship.setGravityY(-500)
+
+	} 
+
+	update () {
+		if (this.ship.y < -100){
+			this.scene.start("Junk")
+		}
+	}
+}
 
 class Junk extends Phaser.Scene {
 
@@ -96,11 +119,14 @@ class Junk extends Phaser.Scene {
 	preload () {
 		/*loading assets */
 		//this.load.image('name', 'location')
+		//source: https://labs.phaser.io/assets/
 		this.load.spritesheet('ship', 'assets/ship.png', {frameWidth:93, frameHeight: 110});
 		this.load.spritesheet('coin', 'assets/coin.png', {frameWidth:32, frameHeight: 32}); //sprite
 		this.load.image('sky', 'assets/clouds.png');
 		this.load.image('bar', 'assets/pipe3.png');
 		this.load.image('bullet', 'assets/bullet7.png');
+		this.load.audio('blaster', 'assets/blaster.mp3');
+		this.load.audio('space chillout', 'assets/space-chillout-14194.mp3');
 	}
 	
 	create () {
@@ -112,13 +138,13 @@ class Junk extends Phaser.Scene {
 		})
 
 		
-		for(let i = 0; i < 10; i++){
+		/*for(let i = 0; i < 10; i++){
 			let bar = this.add.image(Phaser.Math.Between(0, game.config.width), 
 			Phaser.Math.Between(-100, game.config.height), 'bar').setScale(.3);
 			this.obstacleGroup.add(bar);
 			this.obstacleGroup.setVelocityY(100)
 
-		}
+		}*/
 		//this.coin = this.physics.add.sprite(Phaser.Math.Between(0, game.config.width), 
 		//0, 'coin')
 		shipBullets = this.physics.add.group({classType: Bullet, runChildUpdate: true});
@@ -127,6 +153,10 @@ class Junk extends Phaser.Scene {
 		this.ship.body.gravity.y = gameOptions.shipGravity
 		reticle = this.physics.add.sprite(800, 700, 'bullet');
 		this.physics.add.collider(this.ship, this.obstacleGroup)
+		this.blaster = this.sound.add('blaster');
+		this.sound.add('space chillout').play({
+			loop: true
+		});
 
 		this.coinGroup = this.physics.add.group({
 			allowGravity: false 
@@ -145,7 +175,7 @@ class Junk extends Phaser.Scene {
 			if (bullet){
 				
 				bullet.fire(this.ship, reticle);
-				
+				this.blaster.play();
 				
 			}		
 		}, this);
@@ -252,3 +282,21 @@ class Junk extends Phaser.Scene {
 	}
  
 }
+
+class Endgame extends Phaser.Scene {
+	preload () {
+
+	}
+
+	create () {
+
+	}
+
+	update () {
+
+	}
+}
+
+
+//space chillout
+//Music by <a href="https://pixabay.com/users/penguinmusic-24940186/?utm_source=link-attribution&amp;utm_medium=referral&amp;utm_campaign=music&amp;utm_content=14194">penguinmusic</a> from <a href="https://pixabay.com/music//?utm_source=link-attribution&amp;utm_medium=referral&amp;utm_campaign=music&amp;utm_content=14194">Pixabay</a>
