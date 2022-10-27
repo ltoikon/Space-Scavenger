@@ -1,3 +1,10 @@
+/***************************************************
+ * Space Scavenger
+ * Lauri Ikonen
+ * 20221027
+ * Done with Phaser3
+ * 
+ ****************************************************/
 
 let game;
 const gameOptions = {
