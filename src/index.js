@@ -243,7 +243,7 @@ class Junk extends Phaser.Scene {
 		this.triggerTimer = this.time.addEvent({
 			callback: this.addStar,
 			callbackScope: this,
-			delay: 600,
+			delay: 8000,
 			loop: true
 		})
 
@@ -445,12 +445,14 @@ class Endgame extends Phaser.Scene {
 		this.shipHealthText.setText(this.ship.health);
 		this.bossHealthText.setText(this.boss.health);
 
+		//boss movement
 		if(this.boss.x < 200 || this.boss.body.velocity.x == 0){
 			this.boss.body.velocity.x = 250;
 		} else if (this.boss.x > 600){
 			this.boss.body.velocity.x = -250;
 		}
 
+		//ship movement
 		if(this.cursors.left.isDown) {
 			this.ship.body.velocity.x = -gameOptions.shipSpeed
 		}
@@ -471,7 +473,8 @@ class Endgame extends Phaser.Scene {
 		else {
 			this.ship.body.velocity.y = 0
 		}
-
+		
+		//scene changes
 		if(this.boss.active === false){
 			this.scene.start("TheEnd")
 			
