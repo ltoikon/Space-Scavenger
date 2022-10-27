@@ -359,6 +359,7 @@ class Endgame extends Phaser.Scene {
 		this.bossHealthText = this.add.bitmapText(760, 10, 'arcade', this.boss.health).setTint(0xC41E3A);
 		this.shipHealthText = this.add.bitmapText(160, 10, 'arcade', this.ship.health).setTint(0x0096FF);
 		//Sound
+		this.boss.body.velocity.x = -150;
 		
 		this.blaster = this.sound.add('blaster');
 
@@ -443,6 +444,13 @@ class Endgame extends Phaser.Scene {
 	update () {
 		this.shipHealthText.setText(this.ship.health);
 		this.bossHealthText.setText(this.boss.health);
+
+		if(this.boss.x < 200 || this.boss.body.velocity.x == 0){
+			this.boss.body.velocity.x = 250;
+		} else if (this.boss.x > 600){
+			this.boss.body.velocity.x = -250;
+		}
+
 		if(this.cursors.left.isDown) {
 			this.ship.body.velocity.x = -gameOptions.shipSpeed
 		}
