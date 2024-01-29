@@ -1,6 +1,8 @@
 # Space Scavenger
-Short browser game done with Phaser5 framework.
-Done as a project for Introduction for Web Development course.
+Short browser game done with Phaser5 framework. <br>
+Done as a project for "Introduction for Web Programming" course.
+
+🕹️👾 [Here you can try it!](https://ltoikon.github.io/Space-Scavenger/)
 
 ### Game controls
 Player has to click the game window to enable mouse controls<br>
